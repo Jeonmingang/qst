@@ -1,0 +1,12 @@
+
+rewardSets:
+  daily_1: {name: "Day 1", rewards: [{type: MONEY, amount: 1000}]}
+  daily_2: {name: "Day 2", rewards: [{type: MONEY, amount: 2000}]}
+  daily_3: {name: "Day 3", rewards: [{type: COMMAND, command: "give {player} minecraft:diamond 1"}]}
+  daily_4: {name: "Day 4", rewards: []}
+  daily_5: {name: "Day 5", rewards: []}
+  daily_6: {name: "Day 6", rewards: []}
+  daily_7: {name: "Day 7", rewards: []}
+  streak_7: {name: "7일 연속", rewards: [{type: MONEY, amount: 7777}]}
+  streak_30: {name: "30일 연속", rewards: [{type: MONEY, amount: 30000}]}
+  streak_100: {name: "100일 연속", rewards: [{type: COMMAND, command: "broadcast {player} 100일 연속 출석!"}]}

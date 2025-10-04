@@ -1,0 +1,17 @@
+
+quests:
+  catch_any:
+    name: "포켓몬 아무거나 잡기"
+    description: "아무 포켓몬이나 3마리 잡기"
+    type: GENERIC_COUNTER
+    goal: 3
+    daily: true
+    rewardSet: daily_2
+  mine_stone:
+    name: "석재 채굴"
+    description: "돌 64개 캐기"
+    type: BLOCK_BREAK
+    material: STONE
+    goal: 64
+    daily: true
+    rewardSet: daily_3

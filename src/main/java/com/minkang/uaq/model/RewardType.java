@@ -1,0 +1,1 @@
+package com.minkang.uaq.model; public enum RewardType { MONEY, COMMAND, ITEM, PROTECT, POINTS, PASS_XP }

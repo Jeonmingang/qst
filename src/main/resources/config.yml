@@ -1,0 +1,116 @@
+timezone: Asia/Seoul
+resetHourKST: 5
+attendance:
+  cycleDays: 7
+  dailyRewards:
+    1: daily_1
+    2: daily_2
+    3: daily_3
+    4: daily_4
+    5: daily_5
+    6: daily_6
+    7: daily_7
+  streakMilestones:
+    7: streak_7
+    30: streak_30
+    100: streak_100
+quests:
+  assignDailyOnJoin: true
+  maxDailyQuests: 3
+economy:
+  useVault: true
+  moneyAs: "원"
+reroll:
+  allow: true
+  maxPerDay: 1
+  costMoney: 0
+ux:
+  sounds:
+    claim: ENTITY_PLAYER_LEVELUP
+    progress: UI_TOAST_IN
+  titles:
+    enabled: true
+    completeTitle: "&a퀘스트 완료!"
+    completeSub: "&f보상을 수령했습니다."
+messages:
+  prefix: "&6[UAQ]&r "
+  attendanceClaimed: "&a오늘 출석 완료! 현재 연속: &e{streak}"
+  alreadyClaimed: "&c이미 오늘은 출석했습니다."
+  questAssigned: "&a일일 퀘스트가 할당되었습니다."
+  questProgress: "&e{quest}&7 진행도: &b{progress}/{goal}"
+  questCompleted: "&a퀘스트 완료! 보상을 수령하세요."
+  noPermission: "&c권한이 없습니다."
+
+debug: false
+
+points:
+  enabled: true
+attendance:
+  autoClaimOnJoin: false
+protector:
+  costPoints: 10
+  costMoney: 1000
+scoreboard:
+  enabled: true
+welcome:
+  enabled: true
+pointShop:
+  items:
+    small_money:
+      name: "소지금 5000"
+      costPoints: 10
+      command: "eco give {player} 5000"
+    daily_box:
+      name: "데일리 박스"
+      costPoints: 15
+      rewardSet: "daily_3"
+
+arty:
+  windowMs: 300000
+  threshold: 3
+  bonusPoints: 3
+
+multipliers:
+  weekendPoints: 2.0
+  dates:
+    "2025-10-04": 2.0
+
+lucky:
+  chance: 5
+  multiplier: 2.0
+
+coupons:
+  WELCOME:
+    points: 10
+  BOX:
+    rewardSet: "daily_3"
+  VIP:
+    command: "lp user {player} parent add vip"
+
+gift:
+  taxRate: 0.05
+
+pass:
+  xpOnAttendance: 5
+  xpPerPoint: 1
+  levels:
+    1: { xp: 50,  free: "daily_1", premium: "daily_2" }
+    2: { xp: 120, free: "daily_2", premium: "daily_3" }
+    3: { xp: 200, free: "daily_3", premium: "daily_4" }
+
+referral:
+  bonusPoints: 10
+
+dex:
+  thresholds:
+    "10": "daily_1"
+    "30": "daily_2"
+    "60": "daily_3"
+    "90": "daily_4"
+
+uaq:
+  security:
+    menuKeywords: ["UAQ", "출석", "퀘스트", "패스", "알림", "우편함", "설정", "랭킹", "상점"]
+    adminCommandAliases: ["uaq", "관리", "관리자", "출석관리", "퀘관리", "npc연결", "npc해제"]
+    adminPermission: "uaq.admin"
+    commandCooldownMillis: 500

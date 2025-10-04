@@ -1,0 +1,1 @@
+package com.minkang.uaq.gui; import org.bukkit.event.inventory.InventoryClickEvent; import org.bukkit.inventory.Inventory; public interface UMenu { Inventory getInventory(); void onClick(InventoryClickEvent e);}

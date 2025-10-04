@@ -1,0 +1,29 @@
+name: UltimateAttendanceQuest
+main: com.minkang.uaq.UAQPlugin
+version: 2.3.0-KR
+api-version: 1.16
+author: minkang & chatgpt
+softdepend: [Citizens, Vault]
+
+commands:
+  dex:
+    aliases: [도감]
+    description: 픽셀몬 도감 보상/설정
+    usage: /도감 [열기|도움말|설정|갱신|보상설정추가|보상설정삭제|진행설정]
+  attendance:
+    aliases: [출석, 출석체크]
+    description: 출석 GUI 및 하위 메뉴
+    usage: /출석 [상점|패스|설정|달력|알림|우편함]
+  quest:
+    aliases: [퀘스트]
+    description: 일일 퀘스트 GUI
+    usage: /퀘스트
+  uaq:
+    aliases: [관리, 관리자, 출석관리, 퀘관리, npc연결, npc해제, 진행]
+    description: 관리자 메뉴 및 제어
+    usage: /관리
+permissions:
+  uaq.user:
+    default: true
+  uaq.admin:
+    default: op
