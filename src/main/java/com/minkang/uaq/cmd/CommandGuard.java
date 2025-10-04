@@ -24,22 +24,24 @@ public final class CommandGuard implements Listener {
         this.cooldownMs = cooldownMs;
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onPreprocess(PlayerCommandPreprocessEvent e) {
         Player p = e.getPlayer();
-        String msg = e.getMessage(); // like "/uaq ..."
-        if (msg == null || msg.length() < 2) return;
-        String base = msg.substring(1).split("\\s+")[0].toLowerCase(Locale.ROOT);
+        String msg = e.getMessage();
+        if (!msg.startsWith("/")) return;
 
-        // 레이트 리밋 (모든 UAQ 커맨드에 적용)
         long now = System.currentTimeMillis();
-        Long last = lastUse.get(p.getUniqueId());
-        if (last != null && now - last < cooldownMs) {
+        long last = lastUse.getOrDefault(p.getUniqueId(), 0L);
+        if (now - last < cooldownMs) {
             e.setCancelled(true);
             p.sendMessage("§7잠시 후 다시 시도하세요.");
             return;
         }
         lastUse.put(p.getUniqueId(), now);
+
+        // base command
+        String[] parts = msg.substring(1).split("\s+");
+        String base = parts.length > 0 ? parts[0].toLowerCase(Locale.ROOT) : "";
 
         // 관리자형 명령 보호
         if (adminAliases.contains(base)) {

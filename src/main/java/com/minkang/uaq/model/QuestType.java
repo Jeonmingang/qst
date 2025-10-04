@@ -1,1 +1,5 @@
-package com.minkang.uaq.model; public enum QuestType { GENERIC_COUNTER, BLOCK_BREAK }
+package com.minkang.uaq.model;
+
+public enum QuestType {
+    GENERIC_COUNTER, BLOCK_BREAK
+}

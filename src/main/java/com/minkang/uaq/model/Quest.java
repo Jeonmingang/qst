@@ -1,1 +1,9 @@
-package com.minkang.uaq.model; public class Quest { public String id,name,description,material,rewardSet; public com.minkang.uaq.model.QuestType type; public int goal; public boolean daily; }
+package com.minkang.uaq.model;
+
+public class Quest {
+    public String id;
+    public String name;
+    public QuestType type = QuestType.GENERIC_COUNTER;
+    public int goal = 1;
+    public boolean daily = false;
+}
