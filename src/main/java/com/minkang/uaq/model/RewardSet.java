@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RewardSet {
-    private final String key;
-    private final List<String> rewards = new ArrayList<>();
+    public String id;
+    public String name;
+    // Code accesses this field directly, so keep it public
+    public final List<Reward> rewards = new ArrayList<>();
 
-    public RewardSet(String key){
-        this.key = key;
+    public RewardSet(){}
+
+    public RewardSet(String id, String name){
+        this.id = id;
+        this.name = name;
     }
-    public String getKey(){ return key; }
-    public List<String> rewards(){ return rewards; }
 }

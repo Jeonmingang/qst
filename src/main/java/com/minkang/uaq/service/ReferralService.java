@@ -5,4 +5,5 @@ import com.minkang.uaq.UAQPlugin;
 public class ReferralService {
     protected final UAQPlugin plugin;
     public ReferralService(UAQPlugin plugin){ this.plugin = plugin; }
+    public void setReferrer(java.util.UUID who, java.util.UUID ref){}
 }
