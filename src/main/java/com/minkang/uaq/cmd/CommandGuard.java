@@ -29,7 +29,7 @@ public final class CommandGuard implements Listener {
         Player p = e.getPlayer();
         String msg = e.getMessage(); // like "/uaq ..."
         if (msg == null || msg.length() < 2) return;
-        String base = msg.substring(1).split("\s+")[0].toLowerCase(Locale.ROOT);
+        String base = msg.substring(1).split("\\s+")[0].toLowerCase(Locale.ROOT);
 
         // 레이트 리밋 (모든 UAQ 커맨드에 적용)
         long now = System.currentTimeMillis();

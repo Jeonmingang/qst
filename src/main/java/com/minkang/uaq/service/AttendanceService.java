@@ -1,67 +1,218 @@
 
 package com.minkang.uaq.service;
-import com.minkang.uaq.UAQPlugin; import com.minkang.uaq.util.Dates; import org.bukkit.configuration.file.YamlConfiguration;
-import java.io.File; import java.io.IOException; import java.time.LocalDate; import java.util.*;
+
+import com.minkang.uaq.UAQPlugin;
+import com.minkang.uaq.util.Dates;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.*;
+
+/**
+ * Daily attendance tracking + simple point/protector store.
+ * Backed by YAML at plugins/UAQ/players.yml
+ */
 public class AttendanceService {
+
     public static class PlayerAttendance {
         public int streak;
         public String lastDate;
-        public java.util.List<String> dates = new java.util.ArrayList<>();
+        public List<String> dates = new ArrayList<>();
         public int protector;
+        public int points;
     }
-    private final UAQPlugin plugin; private final Dates dates; private File file; private YamlConfiguration data; private final Map<UUID,Integer> streak=new HashMap<>(); private final Map<UUID,String> lastDate=new HashMap<>();
-    public AttendanceService(UAQPlugin plugin){ this.plugin=plugin; this.dates=new Dates(plugin.getConfig()); load(); }
-    private void load(){ file=new File(plugin.getDataFolder(),"players.yml"); data=YamlConfiguration.loadConfiguration(file); }
-    
-public void save(){ try{
-    for(UUID u: streak.keySet()) data.set("players."+u+".streak", streak.get(u));
-    for(UUID u: lastDate.keySet()) data.set("players."+u+".lastDate", lastDate.get(u));
-    for(UUID u: protector.keySet()) data.set("players."+u+".protector", protector.get(u));
-    for(UUID u: datesMap.keySet()) data.set("players."+u+".dates", datesMap.get(u));
-    data.save(file);
-} catch(IOException e){ e.printStackTrace(); } }
-    public boolean canClaim(UUID u){ LocalDate today=dates.todayGameDate(); String t=dates.fmt(today); String last=getLastDate(u); return !t.equals(last); }
-    
-public int claim(UUID u){
-    LocalDate today=dates.todayGameDate();
-    String t=dates.fmt(today);
-    String last=getLastDate(u);
-    int st=getStreak(u);
-    if(t.equals(last)) return st; // already
-    LocalDate lastD = null;
-    try{ lastD = (last==null||last.isEmpty())? null : LocalDate.parse(last); } catch(Exception ignored){}
-    if(lastD!=null){
-        long gap = java.time.temporal.ChronoUnit.DAYS.between(lastD, today);
-        if(gap==1){ st+=1; }
-        else if(gap==2 && getProtector(u)>0){ // one miss, consume protector
-            protector.put(u, getProtector(u)-1);
-            st+=1;
-        } else {
-            st=1;
+
+    private final UAQPlugin plugin;
+    private final Dates datesUtil;
+
+    private File file;
+    private YamlConfiguration data;
+
+    // hot caches
+    private final Map<UUID, Integer> streak = new HashMap<>();
+    private final Map<UUID, String> lastDate = new HashMap<>();
+    private final Map<UUID, List<String>> dateList = new HashMap<>();
+    private final Map<UUID, Integer> protector = new HashMap<>();
+    private final Map<UUID, Integer> points = new HashMap<>();
+
+    public AttendanceService(UAQPlugin plugin) {
+        this.plugin = plugin;
+        this.datesUtil = new Dates(plugin.getConfig());
+        load();
+    }
+
+    private String key(UUID u, String tail) {
+        return "players." + u + "." + tail;
+    }
+
+    private void ensureFile() {
+        if (file == null) {
+            file = new File(plugin.getDataFolder(), "players.yml");
         }
-    } else {
-        st=1;
+        if (data == null) {
+            data = YamlConfiguration.loadConfiguration(file);
+        }
     }
-    streak.put(u,st);
-    lastDate.put(u,t);
-    java.util.List<String> list=getDates(u);
-    if(list.size()>90) list = new java.util.ArrayList<>(list.subList(list.size()-90, list.size()));
-    list.add(t);
-    datesMap.put(u, list);
-    return st;
+
+    private void load() {
+        ensureFile();
+    }
+
+    public void save() {
+        ensureFile();
+        try {
+            data.save(file);
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to save attendance: " + e.getMessage());
+        }
+    }
+
+    public int getStreak(UUID u) {
+        Integer c = streak.get(u);
+        if (c != null) return c;
+        ensureFile();
+        int s = data.getInt(key(u, "streak"), 0);
+        streak.put(u, s);
+        return s;
+    }
+
+    public String getLastDate(UUID u) {
+        String ld = lastDate.get(u);
+        if (ld != null) return ld;
+        ensureFile();
+        String v = data.getString(key(u, "lastDate"), "");
+        if (v == null) v = "";
+        lastDate.put(u, v);
+        return v;
+    }
+
+    public List<String> getDates(UUID u) {
+        List<String> list = dateList.get(u);
+        if (list != null) return list;
+        ensureFile();
+        List<String> v = data.getStringList(key(u, "dates"));
+        if (v == null) v = new ArrayList<>();
+        dateList.put(u, v);
+        return v;
+    }
+
+    public Dates dates() {
+        return datesUtil;
+    }
+
+    public int getProtector(UUID u) {
+        Integer v = protector.get(u);
+        if (v != null) return v;
+        ensureFile();
+        int p = data.getInt(key(u, "protector"), 0);
+        protector.put(u, p);
+        return p;
+    }
+
+    public void addProtector(UUID u, int amount) {
+        int v = Math.max(0, getProtector(u) + Math.max(1, amount));
+        protector.put(u, v);
+        data.set(key(u, "protector"), v);
+        save();
+    }
+
+    public int getPoints(UUID u) {
+        Integer v = points.get(u);
+        if (v != null) return v;
+        ensureFile();
+        int p = data.getInt(key(u, "points"), 0);
+        points.put(u, p);
+        return p;
+    }
+
+    public void addPoints(UUID u, int amount) {
+        int v = Math.max(0, getPoints(u) + amount);
+        points.put(u, v);
+        data.set(key(u, "points"), v);
+        save();
+    }
+
+    public boolean spendPoints(UUID u, int amount) {
+        int have = getPoints(u);
+        if (amount <= 0) return true;
+        if (have < amount) return false;
+        int rem = have - amount;
+        points.put(u, rem);
+        data.set(key(u, "points"), rem);
+        save();
+        return true;
+    }
+
+    public boolean buyProtectorWithPoints(UUID u, int costPoints) {
+        if (!spendPoints(u, costPoints)) return false;
+        addProtector(u, 1);
+        return true;
+    }
+
+    public boolean buyProtectorWithMoney(Player p, double cost) {
+        if (!plugin.economy().withdraw(p.getName(), cost)) return false;
+        addProtector(p.getUniqueId(), 1);
+        return true;
+    }
+
+    public boolean canClaim(UUID u) {
+        String last = getLastDate(u);
+        String today = datesUtil.fmt(datesUtil.todayGameDate());
+        return !today.equals(last);
+    }
+
+    /** Returns new streak after claim. */
+    public int claim(UUID u) {
+        LocalDate today = datesUtil.todayGameDate();
+        String todayStr = datesUtil.fmt(today);
+
+        List<String> list = new ArrayList<>(getDates(u));
+        if (!list.contains(todayStr)) {
+            list.add(todayStr);
+        }
+        dateList.put(u, list);
+        data.set(key(u, "dates"), list);
+
+        int st = getStreak(u);
+        String last = getLastDate(u);
+        LocalDate yesterday = today.minusDays(1);
+        if (todayStr.equals(last)) {
+            // already claimed today
+        } else if (yesterday.equals(parseDate(last))) {
+            st = st + 1;
+        } else {
+            int prot = getProtector(u);
+            if (prot > 0) {
+                prot -= 1;
+                protector.put(u, prot);
+                data.set(key(u, "protector"), prot);
+            } else {
+                st = 1;
+            }
+        }
+        streak.put(u, st);
+        data.set(key(u, "streak"), st);
+        lastDate.put(u, todayStr);
+        data.set(key(u, "lastDate"), todayStr);
+
+        int per = plugin.getConfig().getInt("attendance.pointsPerClaim", 0);
+        if (per > 0) {
+            addPoints(u, per);
+        }
+
+        save();
+        return st;
+    }
+
+    private LocalDate parseDate(String s) {
+        try {
+            if (s == null || s.isEmpty()) return null;
+            return LocalDate.parse(s);
+        } catch (Exception ignore) {
+            return null;
+        }
+    }
 }
-    public int getStreak(UUID u){ if(streak.containsKey(u)) return streak.get(u); int st=data.getInt("players."+u+".streak",0); streak.put(u,st); return st; }
-    public String getLastDate(UUID u){ if(lastDate.containsKey(u)) return lastDate.get(u); String last=data.getString("players."+u+".lastDate",""); lastDate.put(u, last==null?"":last); return lastDate.get(u); }
-}
-
-public int getProtector(java.util.UUID u){ if(protector.containsKey(u)) return protector.get(u); int v=data.getInt("players."+u+".protector",0); protector.put(u,v); return v; }
-public void addProtector(java.util.UUID u, int amount){ int v=getProtector(u)+Math.max(1,amount); protector.put(u,v); }
-public java.util.List<String> getDates(java.util.UUID u){ if(datesMap.containsKey(u)) return datesMap.get(u); java.util.List<String> list=data.getStringList("players."+u+".dates"); datesMap.put(u, list==null? new java.util.ArrayList<>() : list); return datesMap.get(u); }
-
-public com.minkang.uaq.util.Dates dates(){ return dates; }
-
-public int getPoints(java.util.UUID u){ if(points.containsKey(u)) return points.get(u); int v=data.getInt("players."+u+".points",0); points.put(u,v); return v; }
-public void addPoints(java.util.UUID u, int amount){ int v=getPoints(u)+Math.max(1, amount); points.put(u, v); }
-public boolean spendPoints(java.util.UUID u, int amount){ int v=getPoints(u); if(v<amount) return false; points.put(u, v-amount); return true; }
-public boolean buyProtectorWithPoints(java.util.UUID u, int costPoints){ if(costPoints<=0) return false; if(!spendPoints(u, costPoints)) return false; addProtector(u,1); return true; }
-public boolean buyProtectorWithMoney(org.bukkit.entity.Player p, double cost){ if(cost<=0) return false; if(!com.minkang.uaq.UAQPlugin.get().economy().withdraw(p.getName(), cost)) return false; addProtector(p.getUniqueId(),1); return true; }
