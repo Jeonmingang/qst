@@ -2,7 +2,7 @@ package com.minkang.uaq.service;
 
 import com.minkang.uaq.UAQPlugin;
 
-public class PartyBonusService {
+public class TitlesService {
     protected final UAQPlugin plugin;
-    public PartyBonusService(UAQPlugin plugin){ this.plugin = plugin; }
+    public TitlesService(UAQPlugin plugin){ this.plugin = plugin; }
 }
