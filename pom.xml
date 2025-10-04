@@ -58,9 +58,7 @@
         <version>3.11.0</version>
         <configuration>
           <release>${maven.compiler.release}</release>
-          <release>${maven.compiler.release}</release>
-        </configuration>
-        <version>3.11.0</version>
+</configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
