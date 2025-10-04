@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+
+      - name: Print versions
+        run: |
+          java -version
+          mvn -v
+
+      - name: Set UTF-8
+        run: echo 'JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"' >> $GITHUB_ENV
+
+      - name: Build with Maven
+        run: mvn -B -e -DskipTests clean package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-jar
+          path: |
+            target/*.jar
